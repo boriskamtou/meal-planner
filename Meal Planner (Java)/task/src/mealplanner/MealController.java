@@ -19,24 +19,48 @@ public class MealController {
     public void initializeDB() {
         DatabaseManager.createMealTable();
         DatabaseManager.createIngredientsTable();
+        DatabaseManager.getNumberOfMeals();
+        ID = DatabaseManager.getNumberOfMeals();
     }
 
     public void show() {
+        List<String> availableCategories = List.of("breakfast", "lunch", "dinner");
+
+        Scanner sc = new Scanner(System.in);
+
         List<Meal> meals = DatabaseManager.getMeals();
         if (meals.isEmpty()) {
-            System.out.println("No meals saved. Add a meal first.");
+            System.out.println("No meals found.");
             return;
         }
-        for (Meal meal : meals) {
-            System.out.println();
-            System.out.printf("Category: %s \n", meal.getCategory().trim());
-            System.out.printf("Name: %s \n", meal.getName().trim());
-            System.out.println("Ingredients: ");
-            for (String ingredient : meal.getIngredients()) {
-                System.out.println(ingredient.trim());
-            }
+
+        System.out.println("Which category do you want to print (breakfast, lunch, dinner)?");
+        String selectedCategory = sc.nextLine();
+        while (!availableCategories.contains(selectedCategory)) {
+            System.out.println("Wrong meal category! Choose from: breakfast, lunch, dinner.");
+            selectedCategory = sc.nextLine();
+        }
+
+        meals = DatabaseManager.getMealsByCategory(selectedCategory);
+
+        if (meals.isEmpty()) {
+            System.out.println("No meals found.");
+        } else {
+            System.out.println("Category: " + selectedCategory);
             System.out.println();
         }
+
+        for (Meal meal : meals) {
+            if (meal.getCategory().trim().equals(selectedCategory.trim())) {
+                System.out.printf("Name: %s \n", meal.getName().trim());
+                System.out.println("Ingredients: ");
+                for (String ingredient : meal.getIngredients()) {
+                    System.out.println(ingredient.trim());
+                }
+                System.out.println();
+            }
+        }
+
     }
 
     public static boolean verifyIngredients(String[] ingredients) {

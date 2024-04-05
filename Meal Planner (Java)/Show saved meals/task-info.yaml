@@ -775,25 +775,8 @@ files:
       }
     learner_created: true
 feedback_link: https://hyperskill.org/projects/318/stages/1786/implement#comment
-status: Failed
+status: Solved
 feedback:
-  message: "Wrong answer in test #2\n\nYour program should ask the user about the\
-    \ meal category to print: &quot;(breakfast, lunch, dinner)?&quot;\n\nPlease find\
-    \ below the output of your program during this failed test.\nNote that the &#39;&gt;&#39;\
-    \ character indicates the beginning of the input line.\n\n---\n\nWhat would you\
-    \ like to do (add, show, exit)?\n&gt; add\nWhich meal do you want to add (breakfast,\
-    \ lunch, dinner)?\n&gt; lunch\nInput the meal&#39;s name:\n&gt; sushi\nInput the\
-    \ ingredients:\n&gt; salmon, rice, avocado\nThe meal has been added!\nWhat would\
-    \ you like to do (add, show, exit)?\n&gt; add\nWhich meal do you want to add (breakfast,\
-    \ lunch, dinner)?\n&gt; lunch\nInput the meal&#39;s name:\n&gt; omelette\nInput\
-    \ the ingredients:\n&gt; eggs, milk, cheese\nThe meal has been added!\nWhat would\
-    \ you like to do (add, show, exit)?\n&gt; add\nWhich meal do you want to add (breakfast,\
-    \ lunch, dinner)?\n&gt; breakfast\nInput the meal&#39;s name:\n&gt; oatmeal\n\
-    Input the ingredients:\n&gt; oats, milk, banana, peanut butter\nThe meal has been\
-    \ added!\nWhat would you like to do (add, show, exit)?\n&gt; show\n\nCategory:\
-    \ lunch \nName: sushi \nIngredients: \nsalmon\nrice\navocado\n\n\nCategory: lunch\
-    \ \nName: omelette \nIngredients: \neggs\nmilk\ncheese\n\n\nCategory: breakfast\
-    \ \nName: oatmeal \nIngredients: \noats\nmilk\nbanana\npeanut butter\n\nWhat would\
-    \ you like to do (add, show, exit)?"
-  time: "Fri, 05 Apr 2024 15:30:43 UTC"
+  message: Congratulations!
+  time: "Fri, 05 Apr 2024 23:18:17 UTC"
 record: 4
