@@ -11,8 +11,21 @@ public class DatabaseManager {
     static String PASS = "1111";
 
     public DatabaseManager() {
-        createMealTable();
-        createIngredientsTable();
+    }
+
+    // ----------------------------- TABLE CREATION ------------------------------------------------------
+    public static void createPlanTable() {
+        String createPlanTable = "CREATE TABLE IF NOT EXISTS plan (" +
+                "plan_id INTEGER NOT NULL, meal_id INTEGER NOT NULL, meal_category VARCHAR(30) NOT NULL, " +
+                "meal_name VARCHAR(50) NOT NULL, plan_day VARCHAR" +
+                ")";
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            connection.setAutoCommit(true);
+            PreparedStatement preparedStatement = connection.prepareStatement(createPlanTable);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
+        }
     }
 
 
@@ -40,6 +53,46 @@ public class DatabaseManager {
         } catch (SQLException e) {
             System.out.println(Arrays.toString(e.getStackTrace()));
         }
+    }
+
+    // ----------------------------- DATA MANIPULATION ------------------------------------------------------
+    public static void insertPlan(int planID, int mealID, String mealCategory, String mealName, String planDay) {
+        String insert = "INSERT INTO plan (plan_id, meal_id, meal_category, meal_name, plan_day) VALUES(?, ?, ?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            connection.setAutoCommit(true);
+            PreparedStatement preparedStatement = connection.prepareStatement(insert);
+            preparedStatement.setInt(1, planID);
+            preparedStatement.setInt(2, mealID);
+            preparedStatement.setString(3, mealCategory);
+            preparedStatement.setString(4, mealName);
+            preparedStatement.setString(5, planDay);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
+        }
+    }
+
+    public static Plan selectPlanByDay(String day, String category) {
+        String selectPlanByDay = String.format("SELECT *  FROM plan WHERE plan_day = '%s' AND meal_category = '%s'", day, category);
+        Plan plan = null;
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(selectPlanByDay);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                plan = new Plan(
+                        rs.getInt("plan_id"),
+                        rs.getInt("meal_id"),
+                        rs.getString("meal_category"),
+                        rs.getString("meal_name"),
+                        rs.getString("plan_day")
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
+        }
+        return plan;
+
     }
 
     public static void insertMeal(int mealID, String mealCategory, String mealName, String ingredient) {
@@ -75,7 +128,7 @@ public class DatabaseManager {
     }
 
     // Get list of all meals in the database
-    public static List<Meal> getMeals() {
+    public static List<Meal> selectMeals() {
 
         List<Ingredient> ingredients = getIngredients();
 
@@ -83,22 +136,63 @@ public class DatabaseManager {
 
         String selectAllMeals = "SELECT * FROM meals";
 
-        return getMeals(ingredients, meals, selectAllMeals);
+        return selectMeals(ingredients, meals, selectAllMeals);
+    }
+
+    // Select meal by name
+    public static Meal selectMealByName(String mealName) {
+        List<Ingredient> ingredients = getIngredients();
+
+        String selectMealByName = String.format("SELECT * FROM meals WHERE meal = '%s'", mealName);
+
+        Meal meal = null;
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(selectMealByName);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                int mealID = rs.getInt("meal_id");
+                for (Ingredient ingredient : ingredients) {
+                    if (ingredient.getMeal_id() == mealID) {
+                        meal = new Meal(
+                                rs.getInt("meal_id"),
+                                rs.getString("category"),
+                                rs.getString("meal"),
+                                List.of(ingredient.getIngredient().split(","))
+                        );
+                        break;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
+        }
+        return meal;
     }
 
     // Get meals by their category
-    public static List<Meal> getMealsByCategory(String category) {
+    public static List<Meal> selectMealsByCategory(String category) {
         List<Ingredient> ingredients = getIngredients();
 
         List<Meal> meals = new ArrayList<>();
 
         String selectAllMeals = String.format("SELECT * FROM meals WHERE category = '%s'", category);
 
-        return getMeals(ingredients, meals, selectAllMeals);
+        return selectMeals(ingredients, meals, selectAllMeals);
+    }
+
+    public static List<Meal> selectMealsByCategoryAndOrder(String category) {
+        List<Ingredient> ingredients = getIngredients();
+
+        List<Meal> meals = new ArrayList<>();
+
+        String selectAllMeals = String.format("SELECT * FROM meals WHERE category = '%s' ORDER BY meal", category);
+
+        return selectMeals(ingredients, meals, selectAllMeals);
     }
 
     // General method to get meals
-    private static List<Meal> getMeals(List<Ingredient> ingredients, List<Meal> meals, String selectAllMeals) {
+    private static List<Meal> selectMeals(List<Ingredient> ingredients, List<Meal> meals, String selectAllMeals) {
         try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
             PreparedStatement preparedStatement = connection.prepareStatement(selectAllMeals);
             ResultSet rs = preparedStatement.executeQuery();
@@ -144,11 +238,22 @@ public class DatabaseManager {
         return ingredients;
     }
 
+    // Count the number of meals in the database
     public static int getNumberOfMeals() {
         int count = 0;
         String countAllMeals = "SELECT COUNT(*) FROM meals";
+        return countRow(count, countAllMeals);
+    }
+
+    public static int countNumberOfPlan() {
+        int count = 0;
+        String countAllPlan = "SELECT COUNT(*) FROM plan";
+        return countRow(count, countAllPlan);
+    }
+
+    private static int countRow(int count, String countAllPlan) {
         try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
-            PreparedStatement preparedStatement = connection.prepareStatement(countAllMeals);
+            PreparedStatement preparedStatement = connection.prepareStatement(countAllPlan);
             ResultSet rs = preparedStatement.executeQuery();
             rs.next();
             count = rs.getInt(1);

@@ -13,7 +13,7 @@ public class Main {
         boolean shouldContinue = true;
 
         while (shouldContinue) {
-            System.out.println("What would you like to do (add, show, exit)?");
+            System.out.println("What would you like to do (add, show, plan, exit)?");
             String userChoice = sc.nextLine();
 
             switch (userChoice) {
@@ -23,6 +23,7 @@ public class Main {
                 }
                 case "add" -> mealController.add();
                 case "show" -> mealController.show();
+                case "plan" -> mealController.plan();
             }
         }
     }
