@@ -1,7 +1,10 @@
 package mealplanner;
 
-import java.util.List;
-import java.util.Scanner;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
 
 public class MealController {
     private static final String INGREDIENTS = "Ingredients";
@@ -25,6 +28,7 @@ public class MealController {
         DatabaseManager.createPlanTable();
         ID = DatabaseManager.getNumberOfMeals();
         plan_id = DatabaseManager.countNumberOfPlan();
+
     }
 
     public boolean checkIfMealExist(List<Meal> meals, String meal) {
@@ -36,6 +40,43 @@ public class MealController {
             }
         }
         return isMealExist;
+    }
+
+    List<List<String>> ingredients = new ArrayList<>();
+
+    public void save() {
+        Scanner sc = new Scanner(System.in);
+        List<String> ingredientList = new ArrayList<>();
+
+        if (DatabaseManager.countNumberOfPlan() > 0) {
+            System.out.println("Input a filename:");
+
+            String fileName = sc.nextLine();
+
+            File file = new File(fileName);
+            try (PrintWriter printWriter = new PrintWriter(file)) {
+                List<Plan> plans = DatabaseManager.selectAllPlan();
+                for (Plan plan : plans) {
+                    ingredientList.addAll(DatabaseManager.selectIngredientByMealId(plan.getMealId()));
+                }
+
+                int count = 0;
+                Set<String> uniqueList = new HashSet<>();
+                for (String ingredient : ingredientList) {
+                     count = Collections.frequency(ingredientList, ingredient);
+                    uniqueList.add(ingredient + (count > 1 ? " x" + count : ""));
+                }
+                for(String el : uniqueList) {
+                    printWriter.println(el);
+                }
+                System.out.println("Saved!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Unable to save. Plan your meals first.");
+        }
+
     }
 
     public void plan() {

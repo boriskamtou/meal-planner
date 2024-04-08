@@ -56,6 +56,23 @@ public class DatabaseManager {
     }
 
     // ----------------------------- DATA MANIPULATION ------------------------------------------------------
+
+    public static List<String> selectIngredientByMealId(int id) {
+        String selectIngredientsByMealId = String.format("SELECT * FROM ingredients WHERE meal_id = %d", id);
+
+        String ingredients = "";
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(selectIngredientsByMealId);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                ingredients = rs.getString("ingredient");
+            }
+        } catch (SQLException e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
+        }
+        return List.of(ingredients.split(","));
+    }
+
     public static void insertPlan(int planID, int mealID, String mealCategory, String mealName, String planDay) {
         String insert = "INSERT INTO plan (plan_id, meal_id, meal_category, meal_name, plan_day) VALUES(?, ?, ?, ?, ?)";
         try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
@@ -94,6 +111,33 @@ public class DatabaseManager {
         return plan;
 
     }
+
+    public static List<Plan> selectAllPlan() {
+
+        List<Plan> plans = new ArrayList<>();
+
+        String selectAllPlan = "SELECT * FROM plan";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(selectAllPlan);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                Plan plan = new Plan(
+                        rs.getInt("plan_id"),
+                        rs.getInt("meal_id"),
+                        rs.getString("meal_category"),
+                        rs.getString("meal_name"),
+                        rs.getString("plan_day")
+                );
+                plans.add(plan);
+            }
+        } catch (SQLException e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
+        }
+
+        return plans;
+    }
+
 
     public static void insertMeal(int mealID, String mealCategory, String mealName, String ingredient) {
         String insert = "INSERT INTO meals (meal_id, category, meal) VALUES(?, ?, ?)";
